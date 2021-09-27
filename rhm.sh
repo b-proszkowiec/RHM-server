@@ -1,8 +1,8 @@
 #!/bin/bash
 
-PATH=/home/pi/repo/RHM-server/rhm-server.py
+RHM_PATH=/home/osmc/repo/RHM-server/rhm_server.py
 
 echo "rhm.service: ## Starting ##" | systemd-cat -p info
 
-python3 $PATH 
+python3 $RHM_PATH 
 

@@ -29,7 +29,7 @@ sudo pip3 install Adafruit_DHT
 
 ### Configure systemd to run server automatically as a service
 
-- edit **rhm.sh** to make sure path variable is set to correct path where **rhm_server.py** is located
+- edit **rhm.sh** to make sure RHM_PATH variable is set to correct path where **rhm_server.py** is located
 
 - copy **rhm.sh** to **/usr/local/bin** directory
 ````sh
@@ -48,21 +48,21 @@ sudo vim /etc/systemd/system/rhm.service
 
 - copy and paste following text
 ````
-	[Unit]
-	Description=Remote Home Manager (RHM)
+[Unit]
+Description=Remote Home Manager (RHM)
 
-	Wants=network.target
-	After=syslog.target network-online.target
+Wants=network.target
+After=syslog.target network-online.target
 
-	[Service]
-	Type=simple
-	ExecStart=/usr/local/bin/rhm.sh
-	Restart=on-failure
-	RestartSec=10
-	KillMode=process
+[Service]
+Type=simple
+ExecStart=/usr/local/bin/rhm.sh
+Restart=on-failure
+RestartSec=10
+KillMode=process
 
-	[Install]
-	WantedBy=multi-user.target
+[Install]
+WantedBy=multi-user.target
 ````
 
 - add read and write permission to the owner
