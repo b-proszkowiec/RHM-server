@@ -16,7 +16,31 @@ Installing
 ----------
 SSH into a Raspberry Pi and do following.
 
-### Install Adafruit
+### 1) Using docker
+
+#### Pull image from dockerhub or build it by your own
+````sh
+docker pull bproszkowiec/rhm:0.1
+````
+or
+
+````sh
+docker build -t bproszkowiec/rhm .
+````
+
+#### Mount volume and run it
+
+````sh
+docker run --privileged -d \
+  --name=rhm \
+  --restart unless-stopped \
+  -p 5050:50400/udp \
+  bproszkowiec/rhm:0.1
+````
+
+### 2) Standard installation
+
+#### Install Adafruit
 
 ````sh
 sudo apt-get update
@@ -27,7 +51,7 @@ sudo pip3 install Adafruit_DHT
 ````
 
 
-### Configure systemd to run server automatically as a service
+#### Configure systemd to run server automatically as a service
 
 - edit **rhm.sh** to make sure RHM_PATH variable is set to correct path where **rhm_server.py** is located
 
@@ -80,4 +104,3 @@ Usage
 -----
 
 Download client application for android and see the usage example in rhm-client repository.
-

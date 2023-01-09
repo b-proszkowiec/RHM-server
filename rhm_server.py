@@ -6,15 +6,17 @@ import Adafruit_DHT
 from datetime import datetime
 
 localIP     = "0"
-localPort   = 50001
+localPort   = 50400
 bufferSize  = 1024
 
 SENSOR = Adafruit_DHT.AM2302
 PIN = '4'
 
+def main():
+    queueLock = threading.Lock()
+    serverInitialize(queueLock)
 
-def serverInitialize():
-
+def serverInitialize(queueLock):
     # Create a datagram socket
     UDPServerSocket = socket.socket(family=socket.AF_INET, type=socket.SOCK_DGRAM)
     
@@ -30,7 +32,7 @@ def serverInitialize():
         client_address = bytesAddressPair[1]
     
         if(client_message == b'MEASURE'):
-            proc_response = runMeasure()
+            proc_response = runMeasure(queueLock)
             if proc_response == 'ERROR':
                 continue 
         
@@ -39,8 +41,7 @@ def serverInitialize():
             # Sending a reply to client
             UDPServerSocket.sendto(str.encode(proc_response), client_address)
 
-def runMeasure():
-    
+def runMeasure(queueLock):
     queueLock.acquire()
     humidity, temperature = Adafruit_DHT.read_retry(SENSOR, PIN)
     queueLock.release()   
@@ -54,10 +55,5 @@ def runMeasure():
     time = str(datetime.now().strftime('%Y-%m-%d %H:%M:%S'))
     return time + " | " + 'Temp={0:0.1f}*  Humidity={1:0.1f}%'.format(temperature, humidity)
 
-
-queueLock = threading.Lock()
-
-serverInitialize()
-
-
-
+if __name__ == "__main__":
+    main()
