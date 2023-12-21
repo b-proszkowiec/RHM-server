@@ -3,10 +3,6 @@ FROM balenalib/raspberry-pi-debian
 ENV TZ="Europe/Warsaw"
 ENV SRV_PORT=50400
 
-WORKDIR /app
-
-COPY src .
-
 RUN apt-get update -y && \
     apt-get update -y  && \
     apt-get autoremove -y && \
@@ -18,6 +14,12 @@ RUN apt-get install python3 -y && \
     apt-get install python3-pip -y && \
     python3 -m pip install --upgrade pip setuptools wheel && \
     pip3 install --root-user-action=ignore requests Adafruit_DHT
+
+WORKDIR /app
+
+COPY src .
+
+RUN pip install --root-user-action=ignore -r requirements.txt
 
 EXPOSE $SRV_PORT/udp
 

@@ -1,4 +1,5 @@
 import socket, os, threading, requests
+import schedule, time
 import Adafruit_DHT
 from rhm_logging import *
 from datetime import datetime
@@ -7,19 +8,27 @@ from datetime import datetime
 localIP     = "0"
 localPort   = 50400
 bufferSize  = 1024
+wait_time = 5       # wait in minutes
 
 api_ip = os.environ.get('API_IP', 'localhost')
 api_port = os.environ.get('API_PORT', '6080')
-localPort = os.environ.get('SRV_MEAS_PORT', '50400')
+localPort = os.environ.get('SRV_MEAS_PORT', '50401')
 
 SENSOR = Adafruit_DHT.AM2302
 PIN = '4'
 queueLock = threading.Lock()
 
 def main():
-    serverInitialize(queueLock)
+    # Create a thread and run the function
+    listening_thread = threading.Thread(target=serverInitialize)
+    listening_thread.start()
 
-def serverInitialize(queueLock):
+    schedule.every(wait_time).minutes.do(get_measurement)
+    while True:
+        schedule.run_pending()
+        time.sleep(1)
+
+def serverInitialize():
     # Create a datagram socket
     UDPServerSocket = socket.socket(family=socket.AF_INET, type=socket.SOCK_DGRAM)
     
@@ -35,7 +44,7 @@ def serverInitialize(queueLock):
         client_address = bytesAddressPair[1]
     
         if(client_message == b'MEASURE'):
-            proc_response = get_measurement(queueLock)
+            proc_response = get_measurement()
             if proc_response == None:
                 continue 
         
@@ -52,9 +61,10 @@ def runMeasure(queueLock):
         INFO('Failed to get reading. Try again!')
         return None
 
+    INFO("New measurement prepared: ")
     return  (round(humidity, 1), round(temperature, 1),)
 
-def get_measurement(queueLock):
+def get_measurement():
     measure_data = runMeasure(queueLock)
     
     if measure_data is not None:
@@ -69,7 +79,7 @@ def get_measurement(queueLock):
             response.raise_for_status()
             INFO("Request was successful. Status: " + str(response.status_code))
         except requests.exceptions.RequestException as e:
-            ERROR(f"Error during request: {e}")
+            ERROR(f"Error during request to the rest api: {e}")
 
         time = str(datetime.now().strftime('%Y-%m-%d %H:%M:%S'))
         return time + " | " + 'Temp={}*  Humidity={}%'.format(temperature, humidity)

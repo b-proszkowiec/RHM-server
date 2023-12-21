@@ -37,7 +37,8 @@ services:
     container_name: mariadb-hm
     env_file:
       .env
-
+    ports:
+      - "3306:3306"
     volumes:
       - database:/var/lib/mysql
       - ./init.sql:/docker-entrypoint-initdb.d/init.sql
