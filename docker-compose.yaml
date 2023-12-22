@@ -6,8 +6,8 @@ services:
     privileged: true
     image: bproszkowiec/rhm-measure
     build: ./hm-deamon
-    container_name: rhm-measure
-    restart: always
+    container_name: hm-measure
+    restart: unless-stopped
     depends_on:
       - rhm_api
     env_file:
@@ -20,8 +20,8 @@ services:
   rhm_api:
     image: bproszkowiec/rhm-api
     build: ./hm-rest-api
-    container_name: rhm-api
-    restart: always
+    container_name: hm-api
+    restart: unless-stopped
     depends_on:
       - mysql
     env_file:
@@ -34,16 +34,26 @@ services:
 
   mysql:
     image: tobi312/rpi-mariadb:10.6-alpine
-    container_name: mariadb-hm
+    container_name: hm-mariadb
     env_file:
       .env
-    ports:
-      - "3306:3306"
     volumes:
       - database:/var/lib/mysql
       - ./init.sql:/docker-entrypoint-initdb.d/init.sql
     command: --init-file /docker-entrypoint-initdb.d/init.sql
     restart: unless-stopped
 
+  grafana:
+    image: grafana/grafana:main
+    container_name: hm-grafana
+    restart: unless-stopped
+    depends_on:
+      - mysql
+    ports:
+      - "3000:3000"
+    volumes:
+      - grafana-storage:/var/lib/grafana
+
 volumes:
-  database:
+  database: {}
+  grafana-storage: {}
