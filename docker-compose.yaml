@@ -4,28 +4,26 @@ version: "3"
 services:
   rhm_measure:
     privileged: true
-    image: bproszkowiec/rhm-measure
-    build: ./hm-deamon
-    container_name: hm-measure
+    image: bproszkowiec/hm-deamon
+    # build: ./hm-deamon
+    container_name: hm-deamon
     restart: unless-stopped
     depends_on:
       - rhm_api
-    env_file:
-      .env
+    env_file: .env
     environment:
       API_IP: rhm_api
     ports:
       - "${SRV_MEAS_PORT}:${SRV_MEAS_PORT}/udp"
 
   rhm_api:
-    image: bproszkowiec/rhm-api
-    build: ./hm-rest-api
+    image: bproszkowiec/hm-api
+    # build: ./hm-rest-api
     container_name: hm-api
     restart: unless-stopped
     depends_on:
       - mysql
-    env_file:
-      .env
+    env_file: .env
     environment:
       DB_USER: ${MARIADB_USER}
       DB_PASSWORD: ${MARIADB_PASSWORD}
@@ -35,8 +33,7 @@ services:
   mysql:
     image: tobi312/rpi-mariadb:10.6-alpine
     container_name: hm-mariadb
-    env_file:
-      .env
+    env_file: .env
     volumes:
       - database:/var/lib/mysql
       - ./init.sql:/docker-entrypoint-initdb.d/init.sql
